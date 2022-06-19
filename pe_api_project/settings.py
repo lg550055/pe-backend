@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 # TODO here ------------------------x
 ALLOWED_HOSTS = ['127.0.0.1', 'pe-simple.herokuapp.com']
 
@@ -123,4 +123,5 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = config("ALLOW_ALL_ORIGINS")
+# CORS_ALLOW_ALL_ORIGINS = config('ALLOW_ALL_ORIGINS')
+CORS_ALLOW_ALL_ORIGINS = True
