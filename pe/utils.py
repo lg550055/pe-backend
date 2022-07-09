@@ -64,11 +64,13 @@ def get_estimates(ticker):
   url = 'https://finance.yahoo.com/quote/'+ ticker + '/balance-sheet?p=' + ticker
   page = requests.get(url, headers=headers, timeout=5)
   data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]
-
-  ndebt1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][-1]['reportedValue']['raw'] / 1e9
-  ndebt2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][2]['reportedValue']['raw'] / 1e9
-  ndebt3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][1]['reportedValue']['raw'] / 1e9
-  ndebt4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][0]['reportedValue']['raw'] / 1e9
+  if len(data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt']) == 4:
+    ndebt1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][-1]['reportedValue']['raw'] / 1e9
+    ndebt2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][2]['reportedValue']['raw'] / 1e9
+    ndebt3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][1]['reportedValue']['raw'] / 1e9
+    ndebt4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][0]['reportedValue']['raw'] / 1e9
+  else:
+    ndebt1 = ndebt2 = ndebt3 = ndebt4 = None
 
   # url for industry and sector
   url = 'https://finance.yahoo.com/quote/'+ ticker + '/profile?p=' + ticker
