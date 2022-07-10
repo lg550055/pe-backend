@@ -26,66 +26,70 @@ def get_estimates(ticker):
   # IS, CF items for prev 4 fy and IS for TTM
   date1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][-1]['asOfDate']
   rev1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][-1]['reportedValue']['raw'] / 1e9
-  ebitda1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][-1]['reportedValue']['raw'] / 1e9
-  capex1 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][0]['capitalExpenditures']['raw'] / -1e9
   cfo1 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][0]['totalCashFromOperatingActivities']['raw'] / 1e9
 
   date2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][2]['asOfDate']
   rev2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][2]['reportedValue']['raw'] / 1e9
-  ebitda2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][2]['reportedValue']['raw'] / 1e9
-  capex2 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][1]['capitalExpenditures']['raw'] / -1e9
   cfo2 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][1]['totalCashFromOperatingActivities']['raw'] / 1e9
 
   date3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][1]['asOfDate']
   rev3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][1]['reportedValue']['raw'] / 1e9
-  ebitda3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][1]['reportedValue']['raw'] / 1e9
-  capex3 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][2]['capitalExpenditures']['raw'] / -1e9
   cfo3 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][2]['totalCashFromOperatingActivities']['raw'] / 1e9
 
   date4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][0]['asOfDate']
   rev4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][0]['reportedValue']['raw'] / 1e9
-  ebitda4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][0]['reportedValue']['raw'] / 1e9
-  capex4 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][3]['capitalExpenditures']['raw'] / -1e9
   cfo4 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][3]['totalCashFromOperatingActivities']['raw'] / 1e9
   
   trail_rev = data["QuoteTimeSeriesStore"]['timeSeries']['trailingTotalRevenue'][0]['reportedValue']['raw'] / 1e9
   trail_date = data["QuoteTimeSeriesStore"]['timeSeries']['trailingTotalRevenue'][0]['asOfDate']
-  trail_ebitda = data["QuoteTimeSeriesStore"]['timeSeries']['trailingNormalizedEBITDA'][0]['reportedValue']['raw'] / 1e9
+
+  if len(data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA']) == 4:
+    ebitda1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][-1]['reportedValue']['raw'] / 1e9
+    capex1 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][0]['capitalExpenditures']['raw'] / -1e9
+    ebitda2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][2]['reportedValue']['raw'] / 1e9
+    capex2 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][1]['capitalExpenditures']['raw'] / -1e9
+    ebitda3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][1]['reportedValue']['raw'] / 1e9
+    capex3 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][2]['capitalExpenditures']['raw'] / -1e9
+    ebitda4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][0]['reportedValue']['raw'] / 1e9
+    capex4 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][3]['capitalExpenditures']['raw'] / -1e9
+    trail_ebitda = data["QuoteTimeSeriesStore"]['timeSeries']['trailingNormalizedEBITDA'][0]['reportedValue']['raw'] / 1e9
+  else:
+    ebitda4 = ebitda3 = ebitda2 = ebitda1 = trail_ebitda = None
+    capex4 = capex3 = capex2 = capex1 = None
 
   # url for trailing CF items
   url = 'https://finance.yahoo.com/quote/'+ ticker + '/cash-flow?p=' + ticker
   page = requests.get(url, headers=headers, timeout=5)
-  data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]
+  data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]['QuoteTimeSeriesStore']['timeSeries']
 
-  trail_capex = data['QuoteTimeSeriesStore']['timeSeries']['trailingCapitalExpenditure'][0]['reportedValue']['raw'] / -1e9 # list w 1 obj
-  trail_cfo = data['QuoteTimeSeriesStore']['timeSeries']['trailingOperatingCashFlow'][0]['reportedValue']['raw'] / 1e9 # list w 1 obj
+  trail_capex = None
+  if data['trailingCapitalExpenditure']:
+    trail_capex = data['trailingCapitalExpenditure'][0]['reportedValue']['raw'] / -1e9 # list w 1 obj
+  trail_cfo = data['trailingOperatingCashFlow'][0]['reportedValue']['raw'] / 1e9 # list w 1 obj
 
   # url for netDebt
   url = 'https://finance.yahoo.com/quote/'+ ticker + '/balance-sheet?p=' + ticker
   page = requests.get(url, headers=headers, timeout=5)
-  data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]
-  if len(data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt']) == 4:
-    ndebt1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][-1]['reportedValue']['raw'] / 1e9
-    ndebt2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][2]['reportedValue']['raw'] / 1e9
-    ndebt3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][1]['reportedValue']['raw'] / 1e9
-    ndebt4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt'][0]['reportedValue']['raw'] / 1e9
-  else:
-    ndebt1 = ndebt2 = ndebt3 = ndebt4 = None
+  data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]["QuoteTimeSeriesStore"]['timeSeries']['annualNetDebt']
+  ndebt1 = ndebt2 = ndebt3 = ndebt4 = None
+  if len(data) == 4:
+    ndebt1 = data[3]['reportedValue']['raw'] / 1e9 if data[3] else None
+    ndebt2 = data[2]['reportedValue']['raw'] / 1e9 if data[2] else None
+    ndebt3 = data[1]['reportedValue']['raw'] / 1e9 if data[1] else None
+    ndebt4 = data[0]['reportedValue']['raw'] / 1e9 if data[0] else None
 
   # url for industry and sector
   url = 'https://finance.yahoo.com/quote/'+ ticker + '/profile?p=' + ticker
   page = requests.get(url, headers=headers, timeout=5)
-  data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]
-
-  sector = data['QuoteSummaryStore']['assetProfile']['sector'] # invesment, e.g. WMT = consumer defensive
-  industry = data['QuoteSummaryStore']['assetProfile']['industry'] # E.g. WMT = Discount Stores
+  data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]['QuoteSummaryStore']['assetProfile']
+  sector = data['sector'] # invesment, e.g. WMT = consumer defensive
+  industry = data['industry'] # E.g. WMT = Discount Stores
 
   # url for shrs outstanding
   url = 'https://finance.yahoo.com/quote/'+ ticker + '/key-statistics?p=' + ticker
   page = requests.get(url, headers=headers, timeout=5)
-  data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]
-
-  shrs_out = data['QuoteSummaryStore']['defaultKeyStatistics']['sharesOutstanding']['raw'] / 1e9
+  data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]['QuoteSummaryStore']['defaultKeyStatistics']
+  shrs_out = data['sharesOutstanding']['raw'] / 1e9
 
   Estimate.objects.create(symbol=ticker, num_analysts=num_analysts, 
     fwd_eps=fwd_eps, fwd2_eps=fwd2_eps, fwd_rev=fwd_rev, fwd2_rev=fwd2_rev, 
