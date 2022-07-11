@@ -24,28 +24,28 @@ def get_estimates(ticker):
   page = requests.get(url, headers=headers, timeout=5)
   data = json.loads(re.search('root\.App\.main\s*=\s*(.*);', page.text).group(1))["context"]["dispatcher"]["stores"]
   # IS, CF items for prev 4 fy and IS for TTM
-  date1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][-1]['asOfDate']
+  date1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][-1]['asOfDate'].replace('-','')
   rev1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][-1]['reportedValue']['raw'] / 1e9
   eps1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualDilutedEPS'][-1]['reportedValue']['raw']
   cfo1 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][0]['totalCashFromOperatingActivities']['raw'] / 1e9
 
-  date2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][2]['asOfDate']
+  date2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][2]['asOfDate'].replace('-','')
   rev2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][2]['reportedValue']['raw'] / 1e9
   eps2 = data["QuoteTimeSeriesStore"]['timeSeries']['annualDilutedEPS'][2]['reportedValue']['raw']
   cfo2 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][1]['totalCashFromOperatingActivities']['raw'] / 1e9
 
-  date3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][1]['asOfDate']
+  date3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][1]['asOfDate'].replace('-','')
   rev3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][1]['reportedValue']['raw'] / 1e9
   eps3 = data["QuoteTimeSeriesStore"]['timeSeries']['annualDilutedEPS'][1]['reportedValue']['raw']
   cfo3 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][2]['totalCashFromOperatingActivities']['raw'] / 1e9
 
-  date4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][0]['asOfDate']
+  date4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][0]['asOfDate'].replace('-','')
   rev4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualTotalRevenue'][0]['reportedValue']['raw'] / 1e9
   eps4 = data["QuoteTimeSeriesStore"]['timeSeries']['annualDilutedEPS'][0]['reportedValue']['raw']
   cfo4 = data["QuoteSummaryStore"]['cashflowStatementHistory']['cashflowStatements'][3]['totalCashFromOperatingActivities']['raw'] / 1e9
   
   trail_rev = data["QuoteTimeSeriesStore"]['timeSeries']['trailingTotalRevenue'][0]['reportedValue']['raw'] / 1e9
-  trail_date = data["QuoteTimeSeriesStore"]['timeSeries']['trailingTotalRevenue'][0]['asOfDate']
+  trail_date = data["QuoteTimeSeriesStore"]['timeSeries']['trailingTotalRevenue'][0]['asOfDate'].replace('-','')
 
   if len(data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA']) == 4:
     ebitda1 = data["QuoteTimeSeriesStore"]['timeSeries']['annualNormalizedEBITDA'][-1]['reportedValue']['raw'] / 1e9
